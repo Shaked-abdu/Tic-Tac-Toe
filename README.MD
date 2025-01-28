@@ -1,7 +1,7 @@
 # Tic Tac Toe
 
 ## Information
-The application use socket io to establish connection for live updates between the server and the players. while players is connecting to the game they connection with socket that allows two players to play against each other in real-time.
+The application use socket io to establish connection for live updates between the server and the players. while players is connecting to the game they connect with socket that allows two players to play against each other in real-time.
 ###
 State
 ###
