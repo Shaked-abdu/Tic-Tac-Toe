@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Socket.io Example</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <!-- Include the Socket.io client -->
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f0f0f0;
+        margin: 0;
+      }
+      .game-board {
+        display: grid;
+        grid-template-columns: repeat(3, 100px);
+        grid-template-rows: repeat(3, 100px);
+        gap: 5px;
+        margin: 20px;
+      }
+      .cell {
+        width: 100px;
+        height: 100px;
+        background-color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2em;
+        border: 1px solid #ccc;
+        cursor: pointer;
+      }
+      .cell.taken {
+        pointer-events: none;
+      }
+      .message {
+        text-align: center;
+        font-size: 1.5em;
+        margin-top: 20px;
+      }
+      #new-game {
+        padding: 10px 20px;
+        font-size: 1.2em;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        cursor: pointer;
+        margin-top: 20px;
+      }
+
+      #new-game:hover {
+        background-color: #45a049;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      const socket = io();
+
+      let game;
+
+      socket.on("connect", () => {
+        console.log("Connected to the server");
+      });
+
+      socket.on("updateState", function (data) {
+        console.log(`Received game state: ${JSON.stringify(data)}`);
+        game = data;
+        if (game.winner) {
+          showAlert();
+        }
+        updateBoard();
+      });
+
+      socket.on("disconnect", () => {
+        console.log("Disconnected from the server");
+      });
+
+      function makeMove(index) {
+        socket.emit("move", index);
+      }
+
+      function updateBoard() {
+        const cells = document.querySelectorAll(".cell");
+        game.board.forEach((cell, index) => {
+          cells[index].textContent = cell;
+        });
+      }
+
+      function showAlert() {
+        const message = document.getElementById("message");
+        message.textContent =
+          game.winner === "Draw"
+            ? "It's a draw!"
+            : `Player ${game.winner} wins!`;
+      }
+
+      function startNewGame() {
+        socket.emit("newGame"); // Emit a 'newGame' event to the server
+        document.getElementById("message").textContent = ""; // Clear any message
+        const cells = document.querySelectorAll(".cell");
+        cells.forEach((cell) => {
+          cell.textContent = ""; // Reset the board display
+          cell.classList.remove("taken"); // Remove the 'taken' class
+        });
+      }
+    </script>
+    <div>
+      <h1 style="text-align: center">Tic Tac Toe</h1>
+      <div class="game-board" id="game-board">
+        <button class="cell" data-index="0" onclick="makeMove(0)"></button>
+        <button class="cell" data-index="1" onclick="makeMove(1)"></button>
+        <button class="cell" data-index="2" onclick="makeMove(2)"></button>
+        <button class="cell" data-index="3" onclick="makeMove(3)"></button>
+        <button class="cell" data-index="4" onclick="makeMove(4)"></button>
+        <button class="cell" data-index="5" onclick="makeMove(5)"></button>
+        <button class="cell" data-index="6" onclick="makeMove(6)"></button>
+        <button class="cell" data-index="7" onclick="makeMove(7)"></button>
+        <button class="cell" data-index="8" onclick="makeMove(8)"></button>
+      </div>
+      <div class="message" id="message"></div>
+    </div>
+    <button id="new-game" onclick="startNewGame()">Start New Game</button>
+  </body>
+</html>
